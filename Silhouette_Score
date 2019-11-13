@@ -1,0 +1,120 @@
+from sklearn.cluster import SpectralClustering
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import metrics
+from sklearn.cluster import KMeans
+def load_data(noisy_factor):
+    data_path = "D:\\研一上\\矩阵论\\大作业\\data2.txt"
+    data = np.loadtxt(data_path, delimiter = " ")
+    data = data + noisy_factor * 4 * np.random.randn(*data.shape)
+
+    # print(data.shape)
+    return data
+
+def spectral_cluster(data):
+    clustering = SpectralClustering(n_clusters=2, assign_labels="discretize",
+                                    random_state=0).fit(data)
+    length = len(clustering.labels_)
+    return clustering.labels_, length
+
+def k_means_cluster(data):
+    clustering = KMeans(n_clusters=2, random_state=1).fit(data)
+    length = len(clustering.labels_)
+    return clustering.labels_, length
+
+def silhouette_score(data, data_labels):
+    score = metrics.silhouette_score(data, data_labels, metric='euclidean')
+    return score
+
+def calinski_harabasz_score(data, data_labels):
+    score = metrics.calinski_harabasz_score(data, data_labels)
+    return score
+
+
+def visualize_data(data, data_labels):
+    length = data.shape[0]
+    data_x = data[:, 0]
+    data_y = data[:, 1]
+    plt.figure()
+    for i in range(length):
+
+        if data_labels[i] == 0:
+            plt.scatter(data_x[i], data_y[i], color='b')
+        else:
+            plt.scatter(data_x[i], data_y[i], color='r')
+    plt.show()
+
+def plot_data(data):
+    for i in range(data.shape[0]):
+        plt.scatter(data[i, 0], data[i, 1])
+
+def visualize_noisy_data():
+    noisy_data_1 = load_data(noisy_factor=0)
+    noisy_data_2 = load_data(noisy_factor=0.2)
+    noisy_data_3 = load_data(noisy_factor=0.4)
+    noisy_data4 = load_data(noisy_factor=0.6)
+    noisy_data_5 = load_data(noisy_factor=0.8)
+    noisy_data6 = load_data(noisy_factor=1.0)
+    plt.figure()
+    plt.subplot(231)
+    plot_data(noisy_data_1)
+    plt.title('intensity=0')
+    plt.subplot(232)
+    plot_data(noisy_data_2)
+    plt.title('intensity=0.2')
+    plt.subplot(233)
+    plot_data(noisy_data_3)
+    plt.title('intensity=0.4')
+    plt.subplot(234)
+    plot_data(noisy_data4)
+    plt.title('intensity=0.6')
+    plt.subplot(235)
+    plot_data(noisy_data_5)
+    plt.title('intensity=0.8')
+    plt.subplot(236)
+    plot_data(noisy_data6)
+    plt.title('intensity=1.0')
+    plt.show()
+
+
+
+if __name__ =='__main__':
+    # n_interation = 14
+    # S_Score = np.zeros((n_interation))
+    # K_Score = np.zeros((n_interation))
+    # print(S_Score.shape)
+    # for i in range(n_interation):
+    #     data = load_data(noisy_factor = n_interation*0.1)
+    #     spectral_labels, _ = spectral_cluster(data)
+    #     kmeans_labels, _ = k_means_cluster(data)
+    #
+    #     spectral_score = silhouette_score(data, spectral_labels)
+    #     kmeans_score = silhouette_score(data, kmeans_labels)
+    #
+    #     print('interation epoch is :', i)
+    #
+    #     S_Score[i] = spectral_score
+    #     K_Score[i] = kmeans_score
+    #
+    #     print('spec-score is :', spectral_score)
+    #     print('kmeans-score is :', kmeans_score)
+    #     print('    --------   ')
+    #
+    # print('plot starts')
+    # plt.figure()
+    # x = np.arange(n_interation)
+    # plt.plot(x, S_Score, 'r^', linewidth = 3, markersize = 5)
+    # plt.plot(x, K_Score, 'bo', linewidth = 3, markersize = 5)
+    # plt.plot(x, S_Score, 'r', linewidth = 3)
+    # plt.plot(x, K_Score, 'b', linewidth = 3)
+    # plt.xlabel('Noise intensity')
+    # plt.ylabel('Score')
+    # plt.ylim([0, 0.8])
+    # plt.legend(['Spectral Clustering', 'Kmeans Clustering'], loc = 'best')
+    # plt.show()
+
+    visualize_noisy_data()
+
+
+
+# visualize_data(data, kmeans_labels)
