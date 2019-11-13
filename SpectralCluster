@@ -1,0 +1,95 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn import cluster, datasets, mixture
+
+def load_data():
+    data_path = "D:\\研一上\\矩阵论\\大作业\\data2.txt"
+    data1 = np.loadtxt(data_path, delimiter = " ") # 400*2, 共400条数据，每条数据两个特征
+
+    # noisy_circles = datasets.make_circles(n_samples=800, factor=.5,noise=.05)
+    # print('circle is below:', type(noisy_circles))
+    # noisy_moons = datasets.make_moons(n_samples=800, noise=.05)
+    # blobs = datasets.make_blobs(n_samples=800, random_state=8)
+    return data1
+
+def visulize_original_data(data):
+    data_x = data[:,0]
+    data_y = data[:,1]
+    plt.figure()
+    plt.scatter(data_x, data_y)
+    plt.show()
+
+def RbfKernel(mat1, mat2, sigma=1): # 定义高斯核计算方法
+    delta = np.sum(np.square(np.mat(np.subtract(mat1, mat2))), axis=1)
+    result = np.exp(-delta/2/(sigma**2))
+    return result
+
+def get_similarity_matrix_by_fully_connected(data):
+    Similarity_matrix = np.zeros((data.shape[0], data.shape[0]))
+    for i in range(0, data.shape[0]):
+        for j in range(0, data.shape[0]):
+            weights = RbfKernel(data1[i, :], data1[j, :], 1)
+            Similarity_matrix[i, j] = weights
+    return Similarity_matrix
+
+def get_degree_matrix(Similarity_matrix):
+    weight_i = np.sum(Similarity_matrix, axis=1)
+    degree_matrix = np.diag(weight_i)
+    return degree_matrix
+
+def get_laplacian_matrix(data):
+    similarity_matrix = get_similarity_matrix_by_fully_connected(data)
+    degree_matrix = get_degree_matrix(similarity_matrix)
+    laplacian_matrix = degree_matrix - similarity_matrix
+    return laplacian_matrix
+
+def get_eig_vec(Laplacian_matrix, cut_num):
+    eig_value, eig_vec = np.linalg.eig(Laplacian_matrix) # eig_vec：n*n
+    eig_vec_index = eig_value.real.argsort()[:cut_num]
+    H_matrix = np.ndarray(shape = (Laplacian_matrix.shape[0], 0))
+    for i in range(cut_num):
+        corresponding_vec = np.transpose(np.mat(eig_vec[:, eig_vec_index[i]]))
+        H_matrix = np.concatenate((H_matrix, corresponding_vec), axis=1)
+    return H_matrix
+
+def K_means_for_H_matrix(H_matrix, cluster_num=2):
+    kmeans = KMeans(n_clusters = cluster_num)
+    result = kmeans.fit(H_matrix)
+    labels = result.labels_
+    return result, labels
+
+def visulize_cluster_result(matrix, label, cluster_num=2):
+    colors = ['b', 'r', 'y']
+    for index, value in enumerate(label):
+        plt.plot(matrix[index][0], matrix[index][1], 'o', color=colors[int(label[index])])
+    plt.show()
+
+if __name__ == '__main__':
+    data1 = load_data()
+    # visulize_original_data(data1)
+    # L = get_laplacian_matrix(data1)
+    # H_matrix = get_eig_vec(L, cut_num=2)
+    # result, labels = K_means_for_H_matrix(H_matrix, cluster_num=2)
+    # visulize_cluster_result(data1, labels, cluster_num=2)
+
+    kmeans = KMeans(n_clusters=2)
+    result = kmeans.fit(data1)
+    labels = result.labels_
+    visulize_cluster_result(data1, labels, cluster_num=2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
